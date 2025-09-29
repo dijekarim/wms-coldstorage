@@ -1,0 +1,110 @@
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><%= @stock_item.name %></h1>
+    <div>
+      <%= link_to "Back", warehouse_stock_items_path(@warehouse), class: "btn btn-secondary" %>
+      <% if current_user.admin? || current_user.manager? %>
+        <%= link_to "Edit", edit_warehouse_stock_item_path(@warehouse, @stock_item), 
+            class: "btn btn-warning" %>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6 mb-4">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">Item Details</h5>
+        </div>
+        <div class="card-body">
+          <dl class="row">
+            <dt class="col-sm-4">Name:</dt>
+            <dd class="col-sm-8"><%= @stock_item.name %></dd>
+
+            <dt class="col-sm-4">Quantity:</dt>
+            <dd class="col-sm-8">
+              <strong class="<%= 'text-danger' if @stock_item.quantity == 0 %>">
+                <%= @stock_item.quantity %>
+              </strong>
+              <% if @stock_item.quantity == 0 %>
+                <span class="badge bg-danger">Out of Stock</span>
+              <% end %>
+            </dd>
+
+            <dt class="col-sm-4">Warehouse:</dt>
+            <dd class="col-sm-8"><%= link_to @warehouse.name, warehouse_path(@warehouse) %></dd>
+
+            <dt class="col-sm-4">Location:</dt>
+            <dd class="col-sm-8">
+              <% if @stock_item.location %>
+                <%= @stock_item.location.code %>
+              <% else %>
+                <span class="text-muted">Unassigned</span>
+              <% end %>
+            </dd>
+
+            <dt class="col-sm-4">Expiry Date:</dt>
+            <dd class="col-sm-8">
+              <% if @stock_item.expired_date %>
+                <%= @stock_item.expired_date.strftime("%Y-%m-%d") %>
+                <% if @stock_item.expired? %>
+                  <span class="badge bg-danger">Expired</span>
+                <% elsif @stock_item.expired_date < Date.current + 30.days %>
+                  <span class="badge bg-warning">Expiring Soon</span>
+                <% end %>
+              <% else %>
+                <span class="text-muted">No expiry date</span>
+              <% end %>
+            </dd>
+
+            <dt class="col-sm-4">Status:</dt>
+            <dd class="col-sm-8">
+              <% if @stock_item.expired? %>
+                <span class="badge bg-danger">Expired</span>
+              <% elsif @stock_item.quantity == 0 %>
+                <span class="badge bg-secondary">Out of Stock</span>
+              <% else %>
+                <span class="badge bg-success">Active</span>
+              <% end %>
+            </dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+
+    <% if current_user.admin? || current_user.manager? %>
+      <div class="col-md-6 mb-4">
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0">Reduce Quantity</h5>
+          </div>
+          <div class="card-body">
+            <% if @stock_item.quantity > 0 && !@stock_item.expired? %>
+              <%= form_with(url: reduce_quantity_warehouse_stock_item_path(@warehouse, @stock_item), 
+                  method: :post, local: true) do |form| %>
+                <div class="mb-3">
+                  <%= form.label :amount, "Amount to Reduce", class: "form-label" %>
+                  <%= form.number_field :amount, class: "form-control", 
+                      min: 1, max: @stock_item.quantity, required: true %>
+                  <div class="form-text">
+                    Current quantity: <%= @stock_item.quantity %>
+                  </div>
+                </div>
+                <%= form.submit "Reduce Quantity", class: "btn btn-danger", 
+                    data: { confirm: "Are you sure you want to reduce the quantity?" } %>
+              <% end %>
+            <% else %>
+              <div class="alert alert-warning">
+                <% if @stock_item.expired? %>
+                  Cannot reduce quantity - item is expired.
+                <% else %>
+                  Cannot reduce quantity - item is out of stock.
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>

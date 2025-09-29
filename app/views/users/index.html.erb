@@ -1,0 +1,19 @@
+<h1 class="text-xl font-bold mb-4">Manage Users</h1>
+
+<table class="min-w-full bg-white rounded shadow">
+  <thead>
+    <tr>
+      <th class="px-4 py-2 border">Email</th>
+      <th class="px-4 py-2 border">Role</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @users.each do |u| %>
+      <tr>
+        <td class="border px-4 py-2"><%= u.email %></td>
+        <td class="border px-4 py-2 capitalize"><%= u.role %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+<%= link_to "New User", new_user_path, class: "mt-4 inline-block bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700" %>

@@ -1,0 +1,33 @@
+<%= form_with(model: [@warehouse, stock_item], local: true, class: "needs-validation") do |form| %>
+  <% if stock_item.errors.any? %>
+    <div class="alert alert-danger">
+      <h4><%= pluralize(stock_item.errors.count, "error") %> prohibited this stock item from being saved:</h4>
+      <ul>
+        <% stock_item.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="mb-3">
+    <%= form.label :name, class: "form-label" %>
+    <%= form.text_field :name, class: "form-control", required: true %>
+  </div>
+
+  <div class="mb-3">
+    <%= form.label :quantity, class: "form-label" %>
+    <%= form.number_field :quantity, class: "form-control", min: 0, required: true %>
+  </div>
+
+  <div class="mb-3">
+    <%= form.label :expired_date, "Expiry Date (Optional)", class: "form-label" %>
+    <%= form.date_field :expired_date, class: "form-control" %>
+    <div class="form-text">Leave blank if the item doesn't expire.</div>
+  </div>
+
+  <div class="d-flex gap-2">
+    <%= form.submit class: "btn btn-primary" %>
+    <%= link_to "Cancel", warehouse_stock_items_path(@warehouse), class: "btn btn-secondary" %>
+  </div>
+<% end %>

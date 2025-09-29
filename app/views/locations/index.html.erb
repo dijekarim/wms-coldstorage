@@ -1,0 +1,70 @@
+<div class="container mx-auto px-4 py-8">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-3xl font-bold text-gray-900">Locations</h1>
+    <% if policy(Location).create? %>
+      <%= link_to 'New Location', new_warehouse_location_path(@warehouse), 
+                  class: "bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" %>
+    <% end %>
+  </div>
+
+  <div class="mb-4">
+    <%= link_to "← Back to #{@warehouse.name}", warehouse_path(@warehouse), 
+                class: "text-blue-600 hover:text-blue-800" %>
+  </div>
+
+  <% if @locations.any? %>
+    <div class="bg-white shadow overflow-hidden sm:rounded-md">
+      <ul class="divide-y divide-gray-200">
+        <% @locations.each do |location| %>
+          <li>
+            <div class="px-4 py-4 flex items-center justify-between">
+              <div class="flex items-center">
+                <div class="flex-shrink-0">
+                  <div class="h-10 w-10 flex items-center justify-center rounded-full 
+                              <%= location.occupied? ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600' %>">
+                    <span class="text-sm font-medium">
+                      <%= location.occupied? ? 'O' : 'F' %>
+                    </span>
+                  </div>
+                </div>
+                <div class="ml-4">
+                  <div class="text-sm font-medium text-gray-900">
+                    <%= location.code %>
+                  </div>
+                  <div class="text-sm text-gray-500">
+                    <%= location.occupied? ? 'Occupied' : 'Free' %>
+                    <% if location.stock_item %>
+                      - <%= location.stock_item.name %>
+                    <% end %>
+                  </div>
+                </div>
+              </div>
+              <div class="flex items-center space-x-2">
+                <%= link_to 'View', warehouse_location_path(@warehouse, location), 
+                            class: "text-blue-600 hover:text-blue-800 text-sm" %>
+                <% if policy(location).update? %>
+                  <%= link_to 'Edit', edit_warehouse_location_path(@warehouse, location), 
+                              class: "text-indigo-600 hover:text-indigo-800 text-sm" %>
+                <% end %>
+                <% if policy(location).destroy? %>
+                  <%= link_to 'Delete', warehouse_location_path(@warehouse, location), 
+                              method: :delete,
+                              data: { confirm: 'Are you sure?' },
+                              class: "text-red-600 hover:text-red-800 text-sm" %>
+                <% end %>
+              </div>
+            </div>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+  <% else %>
+    <div class="text-center py-12">
+      <div class="text-gray-500 text-lg">No locations found</div>
+      <% if policy(Location).create? %>
+        <%= link_to 'Create the first location', new_warehouse_location_path(@warehouse), 
+                    class: "mt-4 inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" %>
+      <% end %>
+    </div>
+  <% end %>
+</div>

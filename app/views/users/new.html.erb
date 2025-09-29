@@ -1,0 +1,17 @@
+<h1 class="text-xl font-bold mb-4">New User</h1>
+
+<%= form_with model: @user, class: "space-y-4" do |f| %>
+  <div>
+    <%= f.label :email, class: "block font-medium" %>
+    <%= f.email_field :email, class: "mt-1 block w-full border rounded px-3 py-2" %>
+  </div>
+  <div>
+    <%= f.label :password, class: "block font-medium" %>
+    <%= f.password_field :password, class: "mt-1 block w-full border rounded px-3 py-2" %>
+  </div>
+  <div>
+    <%= f.label :role, class: "block font-medium" %>
+    <%= f.select :role, User.roles.keys.map { |r| [r.titleize, r] }, {}, class: "mt-1 block w-full border rounded px-3 py-2" %>
+  </div>
+  <%= f.submit "Create User", class: "bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700" %>
+<% end %>

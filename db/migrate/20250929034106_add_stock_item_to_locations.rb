@@ -1,0 +1,5 @@
+class AddStockItemToLocations < ActiveRecord::Migration[8.0]
+  def change
+    add_reference :locations, :stock_item, null: true, foreign_key: true
+  end
+end

@@ -1,0 +1,196 @@
+<div class="container mx-auto px-4 py-8">
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">Viewer Dashboard</h1>
+    <p class="text-gray-600">Welcome, <%= current_user.email %>! Here's an overview of your warehouse.</p>
+  </div>
+
+  <!-- Quick Stats -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <!-- Total Stock -->
+    <div class="bg-white p-6 rounded-lg shadow-md">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="ml-4">
+          <div class="text-sm font-medium text-gray-500">Total Stock Items</div>
+          <div class="text-2xl font-bold text-gray-900"><%= @stock_count %></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Expiring Soon -->
+    <div class="bg-white p-6 rounded-lg shadow-md">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
+            <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="ml-4">
+          <div class="text-sm font-medium text-gray-500">Expiring Soon</div>
+          <div class="text-2xl font-bold text-gray-900"><%= @expiring_soon %></div>
+          <div class="text-xs text-gray-500">Next 7 days</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Warehouse Info -->
+    <div class="bg-white p-6 rounded-lg shadow-md">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="ml-4">
+          <div class="text-sm font-medium text-gray-500">Warehouse</div>
+          <div class="text-lg font-semibold text-gray-900"><%= @warehouse.name %></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Stock Items -->
+  <div class="bg-white shadow-md rounded-lg">
+    <div class="px-6 py-4 border-b border-gray-200">
+      <h2 class="text-lg font-semibold text-gray-900">Recent Stock Items</h2>
+    </div>
+    <div class="p-6">
+      <% if @warehouse.stock_items.any? %>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Expiry Date</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <% @warehouse.stock_items.includes(:location).limit(10).each do |item| %>
+                <tr>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm font-medium text-gray-900"><%= item.name %></div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-900"><%= item.quantity %></div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-900">
+                      <% if item.expired_date %>
+                        <%= item.expired_date.strftime("%b %d, %Y") %>
+                      <% else %>
+                        <span class="text-gray-400">No expiry</span>
+                      <% end %>
+                    </div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <% if item.expired? %>
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                        Expired
+                      </span>
+                    <% elsif item.expired_date && item.expired_date <= Date.current + 7.days %>
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                        Expiring Soon
+                      </span>
+                    <% else %>
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        Good
+                      </span>
+                    <% end %>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-900">
+                      <% if item.location %>
+                        <%= item.location.code %>
+                      <% else %>
+                        <span class="text-gray-400">Not assigned</span>
+                      <% end %>
+                    </div>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+        <div class="mt-4 text-center">
+          <%= link_to "View All Stock Items", warehouse_stock_items_path(@warehouse), 
+                      class: "text-blue-600 hover:text-blue-800 font-medium" %>
+        </div>
+      <% else %>
+        <div class="text-center py-8">
+          <div class="text-gray-500 text-lg">No stock items found</div>
+          <p class="text-gray-400 mt-2">Stock items will appear here once they are added to the warehouse.</p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="mt-8">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <%= link_to warehouse_stock_items_path(@warehouse), 
+                  class: "bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border border-gray-200" do %>
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+              <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+              </svg>
+            </div>
+          </div>
+          <div class="ml-3">
+            <div class="text-sm font-medium text-gray-900">View Stock Items</div>
+            <div class="text-xs text-gray-500">Browse all inventory</div>
+          </div>
+        </div>
+      <% end %>
+
+      <%= link_to warehouse_locations_path(@warehouse), 
+                  class: "bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border border-gray-200" do %>
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+              <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+              </svg>
+            </div>
+          </div>
+          <div class="ml-3">
+            <div class="text-sm font-medium text-gray-900">View Locations</div>
+            <div class="text-xs text-gray-500">Check warehouse layout</div>
+          </div>
+        </div>
+      <% end %>
+
+      <%= link_to warehouses_path, 
+                  class: "bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border border-gray-200" do %>
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
+              <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+              </svg>
+            </div>
+          </div>
+          <div class="ml-3">
+            <div class="text-sm font-medium text-gray-900">All Warehouses</div>
+            <div class="text-xs text-gray-500">View all warehouses</div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
